@@ -21,9 +21,13 @@
 Parsers for SGML and XML to dom.
 """
 
-import sgmllib, xml.sax.handler
-from dom import *
+try:
+    from sgmllib import SGMLParser as NativeParser
+except ImportError:
+    from html.parser import HTMLParser as NativeParser
 
+import xml.sax.handler
+from .dom import *
 class Parser:
 
   def __init__(self):
@@ -73,10 +77,10 @@ class Parser:
       self.node = self.node.parent
 
 
-class SGMLParser(sgmllib.SGMLParser):
+class SGMLParser(NativeParser):
 
   def __init__(self, entitydefs = None):
-    sgmllib.SGMLParser.__init__(self)
+    NativeParser.__init__(self)
     if entitydefs == None:
       self.entitydefs = {}
     else:
@@ -102,7 +106,7 @@ class SGMLParser(sgmllib.SGMLParser):
     self.parser.end(name)
 
   def close(self):
-    sgmllib.SGMLParser.close(self)
+    NativeParser.close(self)
     self.parser.balance()
     assert self.parser.node == self.parser.tree
 

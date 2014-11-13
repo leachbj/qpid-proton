@@ -51,20 +51,36 @@
     $1.start = NULL;
     $1.size = 0;
   } else {
+#ifdef PY_MAJOR_VERSION >= 3
     $1.start = PyString_AsString($input);
+#else
+    $1.start = PyBytes_AsString($input);
+#endif
     if (!$1.start) {
       return NULL;
     }
+#ifdef PY_MAJOR_VERSION >= 3
     $1.size = PyString_Size($input);
+#else
+    $1.size = PyBytes_Size($input);
+#endif
   }
 }
 
 %typemap(out) pn_bytes_t {
+#ifdef PY_MAJOR_VERSION >= 3
   $result = PyString_FromStringAndSize($1.start, $1.size);
+#else
+  $result = PyBytes_FromStringAndSize($1.start, $1.size);
+#endif
 }
 
 %typemap(out) pn_delivery_tag_t {
+#ifdef PY_MAJOR_VERSION >= 3
   $result = PyString_FromStringAndSize($1.bytes, $1.size);
+#else
+  $result = PyBytes_FromStringAndSize($1.bytes, $1.size);
+#endif
 }
 
 %typemap(in) pn_uuid_t {
@@ -72,9 +88,17 @@
   if ($input == Py_None) {
     ; // Already zeroed out
   } else {
+#ifdef PY_MAJOR_VERSION >= 3
     const char* b = PyString_AsString($input);
+#else
+    const char* b = PyBytes_AsString($input);
+#endif
     if (b) {
+#ifdef PY_MAJOR_VERSION >= 3
         memmove($1.bytes, b, (PyString_Size($input) < 16 ? PyString_Size($input) : 16));
+#else
+        memmove($1.bytes, b, (PyBytes_Size($input) < 16 ? PyBytes_Size($input) : 16));
+#endif
     } else {
         return NULL;
     }
@@ -82,7 +106,11 @@
 }
 
 %typemap(out) pn_uuid_t {
+#ifdef PY_MAJOR_VERSION >= 3
   $result = PyString_FromStringAndSize($1.bytes, 16);
+#else
+  $result = PyBytes_FromStringAndSize($1.bytes, 16);
+#endif
 }
 
 %apply pn_uuid_t { pn_decimal128_t };

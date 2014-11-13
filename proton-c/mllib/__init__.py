@@ -21,12 +21,15 @@
 This module provides document parsing and transformation utilities for
 both SGML and XML.
 """
-
-import os, dom, transforms, parsers, sys
+import os, sys
+from mllib import dom, transforms, parsers
 import xml.sax, types
 from xml.sax.handler import ErrorHandler
 from xml.sax.xmlreader import InputSource
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 def transform(node, *args):
   result = node
