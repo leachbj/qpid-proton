@@ -16,7 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import logging, os, Queue, socket, time, types
+import logging, os, socket, time, types
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 from heapq import heappush, heappop, nsmallest
 from proton import Collector, Connection, ConnectionException, Delivery, Described, dispatch
 from proton import Endpoint, Event, EventBase, EventType, generate_uuid, Handler, Link, Message
@@ -69,7 +73,7 @@ class AmqpSocket(object):
             sasl.client()
         try:
             self.socket.connect_ex((host, port or 5672))
-        except socket.gaierror, e:
+        except socket.gaierror as e:
             raise ConnectionException("Cannot resolve '%s': %s" % (host, e))
         return self
 
@@ -110,7 +114,7 @@ class AmqpSocket(object):
                 return False
             else: # p == 0
                 return False
-        except TransportException, e:
+        except TransportException as e:
             self.write_done = True
             return False
 
@@ -127,10 +131,10 @@ class AmqpSocket(object):
                         self.write_done = True
                     else:
                         self.transport.close_tail()
-            except TransportException, e:
+            except TransportException as e:
                 logging.error("Error on read: %s" % e)
                 self.read_done = True
-            except socket.error, e:
+            except socket.error as e:
                 logging.error("Error on recv: %s" % e)
                 self.read_done = True
                 self.write_done = True
@@ -146,10 +150,10 @@ class AmqpSocket(object):
                 self.transport.pop(n)
             elif p < 0:
                 self.write_done = True
-        except TransportException, e:
+        except TransportException as e:
             logging.error("Error on write: %s" % e)
             self.write_done = True
-        except socket.error, e:
+        except socket.error as e:
             logging.error("Error on send: %s" % e)
             self.write_done = True
 
@@ -865,7 +869,7 @@ class Container(object):
 
 import traceback
 from proton import WrappedHandler, _chandler, secs2millis, millis2secs, Selectable
-from wrapper import Wrapper
+from .wrapper import Wrapper
 from cproton import *
 
 class Task(Wrapper):
@@ -961,7 +965,7 @@ class Reactor(Wrapper):
             for exc, value, tb in self.errors[:-1]:
                 traceback.print_exception(exc, value, tb)
             exc, value, tb = self.errors[-1]
-            raise exc, value, tb
+            raise exc(value).with_traceback(tb)
         return result
 
     def stop(self):

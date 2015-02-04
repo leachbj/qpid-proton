@@ -17,10 +17,11 @@
 # under the License.
 #
 
-import os, common, gc
+import os, gc
+from . import common
 from time import time, sleep
 from proton import *
-from common import pump
+from .common import pump, Skipped
 
 # older versions of gc do not provide the garbage list
 if not hasattr(gc, "garbage"):
@@ -1799,9 +1800,6 @@ class PipelineTest(Test):
       d.settle()
 
     assert rcv.queued == 0, rcv.queued
-
-import sys
-from common import Skipped
 
 class ServerTest(Test):
 
