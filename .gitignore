@@ -1,5 +1,7 @@
 *~
 *.swp
+*.orig
+core*
 
 # Start of IntelliJ IDE files
 .idea
